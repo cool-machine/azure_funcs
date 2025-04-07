@@ -37,7 +37,7 @@ except ImportError as e:
         logging.error(f"Failed to import list_blobs from ..src.utils.azure_utils: {str(e)}")
         # Final fallback - try to import directly
     
-# from azure_utils import list_blobs
+from src.utils.azure_utils import list_blobs
 # logging.info("Successfully imported list_blobs directly from azure_utils")
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
