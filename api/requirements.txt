@@ -1,4 +1,4 @@
-azure-functions
+azure-functions==1.21.1
 absl-py==2.2.1
 altair==5.5.0
 astunparse==1.6.3
