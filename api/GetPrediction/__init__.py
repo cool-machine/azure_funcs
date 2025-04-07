@@ -28,8 +28,36 @@ import matplotlib
 
 from transformers import TFSegformerForSemanticSegmentation, SegformerConfig
 
-# Import our improved utility functions
-from src.utils.azure_utils import download_blob, list_blobs
+# Try different import paths
+try:
+    # First try the local import - directly from the same directory
+    from . import azure_utils
+    list_blobs = azure_utils.list_blobs
+    download_blob_to_memory = azure_utils.download_blob_to_memory
+    logging.info("Successfully imported from local azure_utils")
+except ImportError as e:
+    logging.error(f"Failed to import from local azure_utils: {str(e)}")
+    try:
+        # Try absolute import
+        from src.utils.azure_utils import list_blobs, download_blob_to_memory
+        logging.info("Successfully imported from src.utils.azure_utils")
+    except ImportError as e:
+        logging.error(f"Failed to import from src.utils.azure_utils: {str(e)}")
+        try:
+            # Try relative import
+            from ..src.utils.azure_utils import list_blobs, download_blob_to_memory
+            logging.info("Successfully imported from ..src.utils.azure_utils")
+        except ImportError as e:
+            logging.error(f"Failed to import from ..src.utils.azure_utils: {str(e)}")
+            # Final fallback - try direct import
+            try:
+                import azure_utils
+                list_blobs = azure_utils.list_blobs
+                download_blob_to_memory = azure_utils.download_blob_to_memory
+                logging.info("Successfully imported directly from azure_utils")
+            except ImportError as e:
+                logging.error(f"All import attempts failed: {str(e)}")
+                raise ImportError("Could not import from any location")
 
 matplotlib.use('Agg')
 
@@ -88,7 +116,6 @@ def load_image(image_source: Union[str, bytes],
         Image as a normalized numpy array or None if the image couldn't be loaded
     """
     try:
-        from src.utils.azure_utils import download_blob_to_memory
         image_data = download_blob_to_memory(image_source, 
                                             container_name=container_name, 
                                             container_type="images")

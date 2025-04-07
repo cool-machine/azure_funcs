@@ -24,21 +24,31 @@ logging.info(f"System path: {sys.path}")
 
 # Try different import paths
 try:
-    # First try the local import
-    from src.utils.azure_utils import list_blobs
-    logging.info("Successfully imported list_blobs from src.utils.azure_utils")
+    # First try the local import - directly from the same directory
+    from . import azure_utils
+    list_blobs = azure_utils.list_blobs
+    logging.info("Successfully imported list_blobs from local azure_utils")
 except ImportError as e:
-    logging.error(f"Failed to import list_blobs from src.utils.azure_utils: {str(e)}")
+    logging.error(f"Failed to import list_blobs from local azure_utils: {str(e)}")
     try:
-        # Try relative import
-        from ..src.utils.azure_utils import list_blobs
-        logging.info("Successfully imported list_blobs from ..src.utils.azure_utils")
+        # Try absolute import
+        from src.utils.azure_utils import list_blobs
+        logging.info("Successfully imported list_blobs from src.utils.azure_utils")
     except ImportError as e:
-        logging.error(f"Failed to import list_blobs from ..src.utils.azure_utils: {str(e)}")
-        # Final fallback - try to import directly
-    
-from src.utils.azure_utils import list_blobs
-# logging.info("Successfully imported list_blobs directly from azure_utils")
+        logging.error(f"Failed to import list_blobs from src.utils.azure_utils: {str(e)}")
+        try:
+            # Try relative import
+            from ..src.utils.azure_utils import list_blobs
+            logging.info("Successfully imported list_blobs from ..src.utils.azure_utils")
+        except ImportError as e:
+            logging.error(f"Failed to import list_blobs from ..src.utils.azure_utils: {str(e)}")
+            try:
+                import azure_utils
+                list_blobs = azure_utils.list_blobs
+                logging.info("Successfully imported list_blobs directly from azure_utils")
+            except ImportError as e:
+                logging.error(f"All import attempts failed: {str(e)}")
+                raise ImportError("Could not import list_blobs from any location")
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request to get images.')
